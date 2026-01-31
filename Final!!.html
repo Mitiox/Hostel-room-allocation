@@ -1,0 +1,2599 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hostel Room Allocation System</title>
+
+    <!-- Embedded CSS -->
+    <style>
+      /* --- VARIABLES --- */
+      :root {
+        --font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+
+        /* Light Theme (Adjusted to match image) */
+        --bg-primary: #f9fafb; /* White background -> Light grey */
+        --bg-secondary: #ffffff;
+        --bg-sidebar: #ffffff; /* White sidebar */
+        --bg-accent: #f0f9ff;
+        --text-primary: #111827;
+        --text-secondary: #4b5563;
+        --text-sidebar: #374151; /* Darker sidebar text */
+        --text-sidebar-active: #0c4a6e; /* Dark blue for active text */
+        --text-sidebar-hover: #1d4ed8; /* Blue for hover */
+        --border-color: #e5e7eb;
+        --sidebar-border-color: #f3f4f6; /* Lighter border for sidebar */
+        --shadow-color: rgba(0, 0, 0, 0.05);
+        --active-sidebar-bg: #e0f2fe; /* Light blue background for active link */
+        --auth-card-border: #facc15; /* Yellow border for auth card */
+
+        --primary-color: #1e40af; /* Darker blue button */
+        --primary-color-hover: #1e3a8a;
+        --danger-color: #ef4444;
+        --danger-color-hover: #dc2626;
+        --success-color: #10b981;
+        --warning-color: #f59e0b;
+        --footer-bg: #1e3a8a; /* Dark blue footer */
+        --footer-text: #ffffff;
+
+        /* Layout */
+        --sidebar-width: 260px;
+        --border-radius: 0.375rem; /* Slightly less rounded */
+        --transition-speed: 0.3s ease;
+      }
+
+      /* --- DARK THEME (Keep for functionality) --- */
+      body.dark-theme {
+        --bg-primary: #0d1117; /* Very dark grey */
+        --bg-secondary: #161b22; /* Lighter dark grey */
+        --bg-sidebar: #161b22; /* Sidebar dark grey */
+        --bg-accent: #1f6feb26; /* Transparent blue */
+        --text-primary: #e6edf3; /* Light grey */
+        --text-secondary: #8b949e; /* Medium grey */
+        --text-sidebar: #e6edf3; /* Light grey */
+        --text-sidebar-active: #58a6ff; /* Bright blue */
+        --text-sidebar-hover: #58a6ff; /* Bright blue */
+        --border-color: #b4bec8; /* Brighter outline */
+        --sidebar-border-color: var(--auth-card-border); /* Yellow border */
+        --shadow-color: rgba(0, 0, 0, 0.2);
+        --active-sidebar-bg: #1f6feb26; /* Transparent blue */
+        --auth-card-border: #b4bec8; /* Brighter outline */
+
+        --primary-color: #2f81f7; /* Brighter blue */
+        --primary-color-hover: #58a6ff;
+        --danger-color: #f85149;
+        --danger-color-hover: #fa7970;
+        --success-color: #3fb950;
+        --warning-color: #f0b900;
+        --footer-bg: #161b22; /* Dark footer */
+        --footer-text: #8b949e;
+      }
+
+      /* --- BASE STYLES --- */
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html,
+      body {
+        height: 100%;
+      }
+
+      body {
+        font-family: var(--font-family);
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        display: flex;
+        transition: background-color var(--transition-speed),
+          color var(--transition-speed);
+      }
+
+      a {
+        color: var(--primary-color);
+        text-decoration: none;
+        transition: color var(--transition-speed);
+      }
+
+      a:hover {
+        color: var(--primary-color-hover);
+      }
+
+      /* --- LAYOUT --- */
+      .sidebar {
+        width: var(--sidebar-width);
+        height: 100vh;
+        position: fixed;
+        top: 0;
+        left: 0;
+        background-color: var(--bg-sidebar);
+        color: var(--text-sidebar);
+        padding: 1.5rem 0; /* Remove horizontal padding */
+        display: flex;
+        flex-direction: column;
+        transition: background-color var(--transition-speed), border-color var(--transition-speed);
+        overflow-y: auto;
+        border-right: 4px solid var(--sidebar-border-color); /* Use variable */
+      }
+
+      .navbar {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
+      }
+
+      .logo {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-color); /* Blue logo */
+        margin-bottom: 2rem;
+        display: block;
+        padding: 0 1.5rem; /* Add padding back */
+      }
+      body.dark-theme .logo {
+         color: var(--text-sidebar-hover); /* Lighter logo in dark mode */
+      }
+
+
+      .nav-links {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        flex-grow: 1;
+      }
+
+      .nav-link {
+        display: block;
+        padding: 0.75rem 1.5rem;
+        margin-bottom: 0.25rem;
+        margin-left: 1rem;
+        margin-right: 1rem;
+        border-radius: var(--border-radius);
+        color: var(--text-sidebar);
+        font-weight: 500;
+        transition: background-color var(--transition-speed),
+          color var(--transition-speed);
+        border-left: 3px solid transparent; /* For active indicator */
+      }
+
+      .nav-link:hover {
+        color: var(--text-sidebar-hover);
+        background-color: var(--bg-accent); /* Subtle hover */
+      }
+        body.dark-theme .nav-link:hover {
+         background-color: #374151; /* Darker hover in dark mode */
+        }
+
+
+      .nav-link.active {
+        background-color: var(--active-sidebar-bg); /* Light blue background */
+        color: var(--text-sidebar-active); /* Dark blue text */
+        font-weight: 600;
+        border-left: 3px solid var(--primary-color); /* Blue left border */
+      }
+        body.dark-theme .nav-link.active {
+         border-left-color: #60a5fa; /* Lighter blue border in dark mode */
+        }
+
+
+      .main-content-wrapper {
+        margin-left: var(--sidebar-width);
+        width: calc(100% - var(--sidebar-width));
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        border-left: 1px solid #e0e0e0; /* Add subtle left border */
+      }
+        body.dark-theme .main-content-wrapper {
+         border-left-color: var(--border-color);
+        }
+
+
+      main {
+        flex-grow: 1;
+        /* Adjusted top padding to accommodate header-bar */
+        padding: 1rem 2rem 2rem 2rem;
+        /* --- ADDED FOR CENTERING --- */
+        display: flex;
+        flex-direction: column;
+        /* --- END ADD --- */
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        /* --- ADDED FOR CENTERING --- */
+        width: 100%; /* Ensure it takes width */
+        flex-grow: 1; /* Allow container to grow */
+        display: flex;
+        flex-direction: column;
+        /* --- END ADD --- */
+      }
+
+      .page {
+        display: none; /* Initially hide all pages */
+      }
+
+      .page-title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        color: var(--text-primary);
+        /* --- ADDED FOR NEW THEME --- */
+        border-bottom: 3px solid var(--auth-card-border); /* Yellow underline */
+        padding-bottom: 0.5rem; /* Space between text and line */
+        display: inline-block; /* Make border only span the text width */
+        /* --- END ADD --- */
+      }
+
+      footer {
+        padding: 1rem 2rem; /* Reduced padding */
+        background-color: var(--footer-bg); /* Dark blue background */
+        border-top: none; /* Remove top border */
+        text-align: center;
+        color: var(--footer-text); /* White text */
+        transition: none; /* No theme transition */
+      }
+      footer p {
+        font-size: 0.9rem;
+      }
+      
+      /* --- HEADER BAR (Re-added for theme switcher) --- */
+      .header-bar {
+        display: flex;
+        justify-content: flex-end;
+        /* Adjusted padding */
+        padding: 1rem 2rem 0 2rem;
+        background-color: var(--bg-primary); /* Match main bg */
+        transition: background-color var(--transition-speed);
+      }
+
+      /* --- THEME SWITCHER (Top Right Styling) --- */
+      .theme-switcher-container {
+        margin-top: 0; /* Reset margin */
+        padding: 0; /* Reset padding */
+        border-top: none; /* Remove border */
+      }
+
+      .theme-switcher {
+        width: auto; /* Fit content */
+        background-color: var(--bg-secondary); /* Use secondary bg */
+        border: 1px solid var(--border-color);
+        color: var(--text-primary); /* Use main text color */
+        padding: 0.5rem; /* Make it smaller */
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color var(--transition-speed), border-color var(--transition-speed), color var(--transition-speed);
+      }
+
+      .theme-switcher:hover {
+        background-color: var(--bg-accent); /* Use accent for hover */
+      }
+
+      .theme-switcher svg {
+        stroke: var(--text-primary); /* Use main text color */
+        transition: stroke var(--transition-speed);
+      }
+       .theme-switcher:hover svg {
+         stroke: var(--text-primary); /* Keep color on hover */
+       }
+
+
+      /* --- SHARED COMPONENTS --- */
+      .card {
+        background-color: var(--bg-secondary);
+        border-radius: var(--border-radius);
+        /* --- MODIFIED FOR NEW THEME --- */
+        border: 2px solid var(--auth-card-border); /* Yellow border */
+        /* --- END MODIFY --- */
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 1px 3px 0 var(--shadow-color), 0 1px 2px -1px var(--shadow-color); /* Softer shadow */
+        transition: background-color var(--transition-speed),
+          border-color var(--transition-speed);
+      }
+
+      .btn {
+        display: inline-block;
+        background-color: var(--primary-color);
+        color: #ffffff;
+        padding: 0.75rem 1.5rem; /* Slightly more padding */
+        border: none;
+        border-radius: var(--border-radius);
+        font-weight: 600;
+        cursor: pointer;
+        text-align: center;
+        transition: background-color var(--transition-speed);
+      }
+
+      .btn:hover {
+        background-color: var(--primary-color-hover);
+        color: #ffffff;
+      }
+
+      .btn-danger {
+        background-color: var(--danger-color);
+      }
+
+      .btn-danger:hover {
+        background-color: var(--danger-color-hover);
+      }
+
+      .form-group {
+        margin-bottom: 1.25rem;
+      }
+
+      .form-group label {
+        display: block;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        color: var(--text-secondary);
+        font-size: 0.9rem; /* Slightly smaller label */
+      }
+
+      .form-control {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        font-size: 1rem;
+        transition: border-color var(--transition-speed),
+          background-color var(--transition-speed);
+      }
+       /* Style matching image */
+       #auth-page .form-control {
+         background-color: var(--bg-secondary);
+         border-color: var(--auth-card-border); /* Yellow border by default */
+       }
+       body.dark-theme #auth-page .form-control {
+         background-color: var(--bg-secondary); /* Keep bg same */
+         border-color: var(--border-color); /* Use dark border */
+       }
+
+
+      .form-control:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 2px rgba(29, 78, 216, 0.3); /* Match darker blue */
+      }
+
+      .error-message {
+        color: var(--danger-color);
+        background-color: rgba(239, 68, 68, 0.1);
+        border: 1px solid var(--danger-color);
+        padding: 0.75rem 1rem;
+        border-radius: var(--border-radius);
+        margin-top: 1rem;
+      }
+
+      .success-message {
+        color: var(--success-color);
+        background-color: rgba(16, 185, 129, 0.1);
+        border: 1px solid var(--success-color);
+        padding: 0.75rem 1rem;
+        border-radius: var(--border-radius);
+        margin-top: 1rem;
+      }
+
+      table.admin-table,
+      table.availability-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+      }
+
+      table.admin-table th,
+      table.admin-table td,
+      table.availability-table th,
+      table.availability-table td {
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--border-color);
+        text-align: left;
+      }
+
+      table.admin-table th,
+      table.availability-table th {
+        background-color: var(--bg-accent);
+      }
+
+      .room-available {
+        color: var(--success-color);
+        font-weight: 600;
+      }
+
+      .room-occupied {
+        color: var(--danger-color);
+        font-weight: 600;
+      }
+
+      /* --- AUTH PAGE --- */
+      #auth-page {
+        display: flex;
+        justify-content: center;
+        /* --- MODIFIED FOR CENTERING --- */
+        align-items: center; /* Center vertically */
+        flex-grow: 1; /* Make the auth page itself fill the 'main' area */
+        padding: 2rem; /* Add padding for small screens */
+        /* --- END MODIFY --- */
+      }
+
+      .auth-container {
+        width: 100%;
+        max-width: 400px; /* Slightly narrower */
+      }
+
+      .auth-card {
+        padding: 0;
+        overflow: hidden;
+        /* --- MODIFIED FOR NEW THEME --- */
+        /* border: 2px solid var(--auth-card-border); */ /* Removed, now handled by .card */
+        /* --- END MODIFY --- */
+        box-shadow: 0 4px 6px -1px var(--shadow-color), 0 2px 4px -1px var(--shadow-color);
+        border-radius: 0.5rem; /* Match image rounding */
+      }
+        body.dark-theme .auth-card {
+         border-color: var(--auth-card-border); /* Use dark card border */
+        }
+
+      .auth-tabs {
+        display: flex;
+        /* border-bottom: 1px solid var(--border-color); */ /* Replaced by tab borders */
+        background-color: var(--bg-secondary); /* Ensure bg matches */
+      }
+
+      .tab-btn {
+        flex: 1;
+        padding: 0.8rem 1rem; /* Adjust padding */
+        font-size: 1rem; /* Slightly smaller */
+        font-weight: 500; /* Medium weight */
+        text-align: center;
+        cursor: pointer;
+        border: none;
+        background-color: transparent;
+        color: var(--text-secondary);
+        border-bottom: 2px solid var(--auth-card-border); /* Yellow underline */
+        transition: color var(--transition-speed), border-color var(--transition-speed);
+        position: relative;
+      }
+        body.dark-theme .tab-btn {
+         border-bottom-color: var(--border-color); /* Dark border for tabs */
+        }
+      
+      .tab-btn.active {
+        color: var(--primary-color);
+        font-weight: 600;
+        border-bottom-color: var(--primary-color); /* Blue underline for active */
+      }
+        body.dark-theme .tab-btn.active {
+         border-bottom-color: var(--primary-color); /* Blue underline for active */
+        }
+
+      #login-form-container,
+      #signup-form-container {
+        padding: 1.5rem 2rem 2rem 2rem; /* Adjust padding */
+         background-color: var(--bg-secondary);
+      }
+
+      /* --- DASHBOARD PAGE --- */
+      .welcome-section {
+        /* --- MODIFIED FOR NEW THEME --- */
+        /* background: linear-gradient(...); */ /* Removed gradient */
+        color: var(--text-primary); /* Set text to primary */
+        /* --- END MODIFY --- */
+        padding: 2rem;
+        border-radius: var(--border-radius); /* Add rounding */
+      }
+
+      .welcome-section h2 {
+        font-size: 1.8rem;
+        font-weight: 600;
+      }
+
+      .status-card {
+        /* --- MODIFIED FOR NEW THEME --- */
+        background-color: var(--active-sidebar-bg); /* Light blue bg */
+        /* --- END MODIFY --- */
+        padding: 1.5rem;
+        border-radius: var(--border-radius);
+        margin-bottom: 1.5rem;
+        border: 1px solid var(--border-color); /* Keep standard border */
+      }
+        body.dark-theme .status-card {
+         border-color: var(--auth-card-border); /* Use dark card border */
+        }
+
+      .status-card h3 {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+      }
+
+      .status-card p {
+        font-size: 1.1rem;
+        color: var(--text-secondary);
+      }
+
+      .status-card #allocation-status {
+        font-weight: 700;
+        color: var(--text-primary);
+      }
+
+      /* --- NEW DASHBOARD STATS --- */
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .stat-chart-card {
+        /* Use the main card style for consistency */
+        background-color: var(--bg-secondary);
+        border-radius: var(--border-radius);
+        border: 2px solid var(--auth-card-border);
+        padding: 1.5rem 1rem;
+        box-shadow: 0 1px 3px 0 var(--shadow-color), 0 1px 2px -1px var(--shadow-color);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .donut-chart {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        /*
+          We use a CSS variable --percentage (set in HTML) to drive the gradient.
+          The gradient goes from the progress color (orange) up to the percentage,
+          and then the base color (blue) for the rest.
+        */
+        background: conic-gradient(
+          var(--color-progress) 0% calc(var(--percentage) * 1%),
+          var(--color-base) calc(var(--percentage) * 1%) 100%
+        );
+        transition: background 0.5s ease;
+      }
+
+      /* This pseudo-element creates the "hole" in the donut */
+      .donut-chart::before {
+        content: "";
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: calc(100% - 30px); /* 15px ring thickness */
+        height: calc(100% - 30px); /* 15px ring thickness */
+        background-color: var(--bg-secondary);
+        border-radius: 50%;
+        transition: background-color var(--transition-speed);
+      }
+
+      .chart-percentage {
+        position: relative; /* Sits on top of the ::before pseudo-element */
+        z-index: 2;
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--text-primary);
+      }
+
+      .chart-label {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--text-secondary);
+        text-align: center;
+      }
+      /* --- END NEW STATS --- */
+
+
+      .dashboard-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+      }
+
+      .action-card {
+        background-color: var(--bg-secondary);
+        border-radius: var(--border-radius);
+        /* border: 1px solid var(--border-color); */ /* Removed */
+        padding: 1.5rem;
+        box-shadow: 0 1px 3px 0 var(--shadow-color), 0 1px 2px -1px var(--shadow-color); /* Match card shadow */
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        /* --- ADDED FOR NEW THEME --- */
+        border: 2px solid var(--auth-card-border); /* Yellow border */
+        /* --- ADDED FOR ALIGNMENT --- */
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        /* --- END ADD --- */
+      }
+
+      .action-card:hover {
+        transform: translateY(-3px); /* Less lift */
+        box-shadow: 0 4px 6px -1px var(--shadow-color), 0 2px 4px -1px var(--shadow-color); /* Adjust hover shadow */
+      }
+
+      .action-card h3 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+      }
+
+      .action-card p {
+        color: var(--text-secondary);
+        margin-bottom: 1rem;
+        /* --- ADDED FOR ALIGNMENT --- */
+        flex-grow: 1; /* Pushes button to bottom */
+        min-height: 40px; /* Ensures a minimum space for alignment */
+        /* --- END ADD --- */
+      }
+
+      /* --- PROFILE PAGE --- */
+      .profile-info {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+      }
+
+      .info-group label {
+        font-weight: 600;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
+      }
+
+      .info-group p {
+        font-size: 1.1rem;
+        font-weight: 500;
+        color: var(--text-primary);
+      }
+
+      /* --- MODAL --- */
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+      }
+
+      .modal-content {
+        background-color: var(--bg-secondary);
+        border-radius: var(--border-radius);
+        border: 1px solid var(--border-color);
+        width: 90%;
+        max-width: 500px;
+        animation: modalFadeIn 0.3s ease;
+      }
+
+      /* --- CHATBOT STYLES --- */
+      .chatbot-toggle {
+        position: fixed;
+        bottom: 1.5rem;
+        left: 1.5rem;
+        width: 50px;
+        height: 50px;
+        background-color: var(--primary-color);
+        color: white;
+        border-radius: 50%;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        z-index: 1001;
+        transition: transform 0.2s ease, background-color var(--transition-speed);
+      }
+      .chatbot-toggle:hover {
+        background-color: var(--primary-color-hover);
+        transform: scale(1.1);
+      }
+      .chatbot-toggle svg {
+        width: 28px;
+        height: 28px;
+        stroke: white;
+        stroke-width: 2;
+      }
+      .chatbot-toggle.open {
+        transform: scale(0);
+      }
+
+      .chatbot-container {
+        position: fixed;
+        bottom: 1.5rem;
+        left: 1.5rem;
+        width: 350px;
+        max-width: calc(100% - 3rem);
+        height: 450px;
+        max-height: calc(100vh - 3rem);
+        background-color: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+        box-shadow: 0 5px 15px var(--shadow-color);
+        display: flex;
+        flex-direction: column;
+        z-index: 1000;
+        transform-origin: bottom left;
+        transform: scale(0);
+        transition: transform 0.3s ease, background-color var(--transition-speed), border-color var(--transition-speed);
+      }
+      .chatbot-container.open {
+        transform: scale(1);
+      }
+
+      .chatbot-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        background-color: var(--bg-primary); /* Slightly different from main bg */
+        border-bottom: 1px solid var(--border-color);
+        border-top-left-radius: var(--border-radius);
+        border-top-right-radius: var(--border-radius);
+        transition: background-color var(--transition-speed), border-color var(--transition-speed);
+      }
+      body.dark-theme .chatbot-header {
+         background-color: var(--bg-secondary); /* Match in dark mode */
+      }
+      .chatbot-header h3 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+      .chatbot-close-btn {
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        font-size: 1.5rem;
+        font-weight: 700;
+        cursor: pointer;
+        line-height: 1;
+      }
+
+      .chatbot-messages {
+        flex-grow: 1;
+        padding: 1rem;
+        overflow-y: auto;
+      }
+      .chat-message {
+        margin-bottom: 0.75rem;
+        padding: 0.6rem 0.9rem;
+        border-radius: var(--border-radius);
+        max-width: 85%;
+        word-wrap: break-word;
+      }
+      .user-message {
+        background-color: var(--primary-color);
+        color: white;
+        margin-left: auto;
+        border-bottom-right-radius: 0.25rem;
+      }
+      .bot-message {
+        background-color: var(--bg-accent);
+        color: var(--text-primary);
+        margin-right: auto;
+        border-bottom-left-radius: 0.25rem;
+      }
+      body.dark-theme .bot-message {
+         background-color: #21262d; /* Darker accent */
+      }
+      .bot-typing {
+        font-style: italic;
+        color: var(--text-secondary);
+        margin-right: auto;
+        padding: 0.6rem 0.9rem;
+      }
+
+
+      .chatbot-input-form {
+        display: flex;
+        padding: 0.75rem;
+        border-top: 1px solid var(--border-color);
+        transition: border-color var(--transition-speed);
+      }
+      #chatbot-input {
+        flex-grow: 1;
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+        padding: 0.6rem 0.75rem;
+        font-size: 0.9rem;
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        margin-right: 0.5rem;
+      }
+      #chatbot-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 2px rgba(29, 78, 216, 0.3);
+      }
+      .chatbot-send-btn {
+        border: none;
+        background-color: var(--primary-color);
+        color: white;
+        border-radius: var(--border-radius);
+        padding: 0 0.75rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .chatbot-send-btn:hover {
+        background-color: var(--primary-color-hover);
+      }
+      .chatbot-send-btn svg {
+         width: 20px;
+         height: 20px;
+      }
+
+
+      /* --- RESPONSIVE DESIGN --- */
+      @media (max-width: 900px) {
+        .sidebar {
+          width: 100%;
+          height: auto;
+          position: relative;
+          padding: 1rem 0; /* Adjust padding */
+          border-right: none;
+          border-bottom: 1px solid var(--sidebar-border-color);
+        }
+
+        .navbar {
+          flex-direction: column; /* Stack logo, links, switcher */
+          align-items: stretch; /* Stretch items */
+          height: auto;
+        }
+
+         .logo {
+           padding: 0 1rem; /* Adjust padding */
+           margin-bottom: 1rem;
+         }
+
+        .nav-links {
+          display: flex;
+          flex-direction: row; /* Keep horizontal */
+          flex-grow: 0;
+          overflow-x: auto;
+          padding: 0 0.5rem; /* Add padding for scroll */
+          margin-bottom: 1rem; /* Add margin below nav links */
+        }
+
+
+        .nav-link {
+          padding: 0.5rem 0.75rem;
+          margin: 0 0.25rem; /* Adjust margin */
+          white-space: nowrap;
+          border-left: none; /* Remove left border */
+          font-size: 0.9rem;
+        }
+        .nav-link.active {
+          border-left: none; /* Remove left border */
+        }
+        
+        .navbar .theme-switcher-container {
+          /* Hide theme switcher in mobile sidebar now */
+          display: none;
+        }
+
+        .main-content-wrapper {
+          margin-left: 0;
+          width: 100%;
+          border-left: none; /* Remove border */
+        }
+
+        main {
+          padding: 1rem 1.5rem 1.5rem 1.5rem; /* Adjust padding */
+        }
+        
+        /* Keep header bar for mobile */
+        .header-bar {
+          padding: 1rem 1.5rem 0 1.5rem;
+        }
+      }
+
+      @media (max-width: 600px) {
+        .page-title {
+          font-size: 1.5rem;
+        }
+
+        .profile-info {
+          grid-template-columns: 1fr;
+          gap: 1.5rem;
+        }
+        
+        /* --- NEW: Make stats responsive --- */
+        .stats-grid {
+           grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+           gap: 1rem;
+        }
+        .donut-chart {
+            width: 100px;
+            height: 100px;
+        }
+        .chart-percentage {
+            font-size: 1.5rem;
+        }
+        /* --- END NEW --- */
+
+        main {
+          padding: 0.5rem 1rem 1rem 1rem; /* Adjust padding */
+        }
+        
+        .header-bar {
+          padding: 0.5rem 1rem 0 1rem; /* Adjust padding */
+        }
+
+        .card,
+        #login-form-container,
+        #signup-form-container {
+          padding: 1rem;
+        }
+
+        /* Navbar already column */
+        .logo {
+          text-align: center;
+          margin-bottom: 1rem;
+        }
+
+        .nav-links {
+           flex-wrap: wrap;
+           justify-content: center;
+         }
+        .nav-link {
+          margin-bottom: 0.5rem; /* Add margin back for wrapping */
+        }
+
+        .navbar .theme-switcher-container {
+           /* Already hidden */
+           display: none;
+         }
+
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <nav class="navbar">
+        <div>
+          <a href="#" class="logo">Hostel Allocation</a>
+          <ul class="nav-links">
+            <li>
+              <!-- Set initial active link based on JS logic -->
+              <a href="#" class="nav-link" data-page="auth">Login / Sign Up</a> 
+            </li>
+            <li>
+              <a href="#" class="nav-link" data-page="dashboard">Dashboard</a>
+            </li>
+            <li>
+              <a href="#" class="nav-link" data-page="registration"
+                >Room Registration</a
+              >
+            </li>
+            <li>
+              <a href="#" class="nav-link" data-page="allotment"
+                >Allotment Result</a
+              >
+            </li>
+            <li>
+              <a href="#" class="nav-link" data-page="profile">Profile</a>
+            </li>
+            <li><a href="#" class="nav-link" data-page="admin">Admin</a></li>
+          </ul>
+        </div>
+
+        <!-- THEME SWITCHER REMOVED FROM HERE -->
+        
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-content-wrapper">
+    
+      <!-- THEME SWITCHER LOCATION (Top Right) -->
+      <div class="header-bar">
+        <div class="theme-switcher-container">
+          <button id="theme-switcher" class="theme-switcher" aria-label="Toggle theme">
+            <!-- Adjusted SVG size -->
+            <svg id="theme-icon-moon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+            <svg id="theme-icon-sun" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+          </button>
+        </div>
+      </div>
+      
+      <main>
+        <div class="container">
+          <!-- Unified Auth Page -->
+          <!-- Make auth page visible initially -->
+          <div id="auth-page" class="page" style="display: none;"> <!-- Hide initially, JS will show correct one -->
+            <div class="auth-container">
+              <div class="card auth-card">
+                <div class="auth-tabs">
+                  <button id="login-tab-btn" class="tab-btn active">
+                    Login
+                  </button>
+                  <button id="signup-tab-btn" class="tab-btn">Sign Up</button>
+                </div>
+
+                <!-- Login Form Container -->
+                <div id="login-form-container">
+                  <form id="login-form">
+                    <div class="form-group">
+                      <label for="login-email">Email</label>
+                      <input
+                        type="email"
+                        id="login-email"
+                        class="form-control"
+                        required
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label for="login-password">Password</label>
+                      <input
+                        type="password"
+                        id="login-password"
+                        class="form-control"
+                        required
+                      />
+                    </div>
+                    <button type="submit" class="btn" style="width: 100%">
+                      Login
+                    </button>
+                  </form>
+                  <div
+                    id="login-error"
+                    class="error-message"
+                    style="display: none"
+                  >
+                    <!-- Error message content set by JS -->
+                  </div>
+                </div>
+
+                <!-- Sign Up Form Container -->
+                <div id="signup-form-container" style="display: none">
+                  <form id="signup-form">
+                    <div class="form-group">
+                      <label for="signup-name">Full Name</label>
+                      <input
+                        type="text"
+                        id="signup-name"
+                        class="form-control"
+                        required
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label for="signup-email">Email</label>
+                      <input
+                        type="email"
+                        id="signup-email"
+                        class="form-control"
+                        required
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label for="signup-password">Password</label>
+                      <input
+                        type="password"
+                        id="signup-password"
+                        class="form-control"
+                        required
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label for="signup-gender">Gender</label>
+                      <select id="signup-gender" class="form-control" required>
+                        <option value="">Select Gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </div>
+                    <button type="submit" class="btn" style="width: 100%">
+                      Register
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dashboard Page -->
+          <div id="dashboard-page" class="page" style="display: none">
+            <h1 class="page-title">Student Dashboard</h1>
+            <div class="welcome-section card">
+              <h2 id="welcome-message">Welcome, Student</h2>
+            </div>
+            <div class="status-card">
+              <h3>Allocation Status</h3>
+              <p id="allocation-status">Not Registered</p>
+              <p id="room-details" style="display: none">
+                Room: <span id="room-number"></span>
+              </p>
+            </div>
+
+            <!-- ===== NEW STATS SECTION ===== -->
+            <div class="stats-grid">
+              <div class="stat-chart-card" id="omv-stats">
+                <!-- 
+                  --percentage: The percentage value (0-100)
+                  --color-progress: The color for the progress part
+                  --color-base: The color for the remaining part
+                -->
+                <div class="donut-chart" id="omv-chart" style="--percentage: 0; --color-progress: var(--primary-color); --color-base: var(--border-color);">
+                  <span class="chart-percentage" id="omv-percentage">0%</span>
+                </div>
+                <p class="chart-label">OMV Rooms Filled</p>
+              </div>
+              <div class="stat-chart-card" id="bh2-stats">
+                <div class="donut-chart" id="bh2-chart" style="--percentage: 0; --color-progress: var(--primary-color); --color-base: var(--border-color);">
+                  <span class="chart-percentage" id="bh2-percentage">0%</span>
+                </div>
+                <p class="chart-label">BH-2 Rooms Filled</p>
+              </div>
+              <div class="stat-chart-card" id="allotment-stats">
+                <div class="donut-chart" id="allotment-chart" style="--percentage: 0; --color-progress: var(--success-color); --color-base: var(--border-color);">
+                  <span class="chart-percentage" id="allotment-percentage">0%</span>
+                </div>
+                <p class="chart-label">Overall Allotment</p>
+              </div>
+            </div>
+            <!-- ===== END NEW STATS SECTION ===== -->
+
+            <div class="dashboard-actions">
+              <div class="action-card">
+                <h3>Room Registration</h3>
+                <p>Register for hostel room allocation</p>
+                <a href="#" class="btn nav-link" data-page="registration"
+                  >Register</a
+                >
+              </div>
+              <div class="action-card">
+                <h3>Allotment Result</h3>
+                <p>Check your room allotment status</p>
+                <a href="#" class="btn nav-link" data-page="allotment"
+                  >Check Result</a
+                >
+              </div>
+              <div class="action-card">
+                <h3>Profile</h3>
+                <p>View and edit your profile</p>
+                <a href="#" class="btn nav-link" data-page="profile"
+                  >View Profile</a
+                >
+              </div>
+              <div class="action-card">
+                <h3>Logout</h3>
+                <p>Logout from your account</p>
+                <button class="btn btn-danger" id="logout-btn">Logout</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Room Registration Page -->
+          <div id="registration-page" class="page" style="display: none">
+            <h1 class="page-title">Room Registration</h1>
+            <div class="card">
+              <form id="registration-form">
+                <div class="form-group">
+                  <label for="hostel-block">Hostel Block</label>
+                  <select id="hostel-block" class="form-control" required>
+                    <option value="">Select Hostel Block</option>
+                    <option value="omv">OMV</option>
+                    <option value="bh2">BH-2</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="room-type">Room Type/Preferences</label>
+                  <select id="room-type" class="form-control" required>
+                    <option value="">Select Room Type</option>
+                    <option value="single">Single Occupancy</option>
+                    <option value="double">Double Occupancy</option>
+                    <option value="triple">Triple Occupancy</option>
+                  </select>
+                </div>
+                <button type="submit" class="btn">Submit Registration</button>
+              </form>
+              <div
+                id="registration-success"
+                class="success-message"
+                style="display: none"
+              >
+                Registration submitted successfully!
+              </div>
+              <div
+                id="registration-error"
+                class="error-message"
+                style="display: none"
+              >
+                Error submitting registration. Please try again.
+              </div>
+            </div>
+            <div class="card room-availability">
+              <h3>Room Availability</h3>
+              <div id="omv-availability" style="display: none">
+                <h4>OMV Hostel</h4>
+                <table class="availability-table">
+                  <thead>
+                    <tr>
+                      <th>Room Range</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="omv-availability-body">
+                    <!-- Will be populated by JavaScript -->
+                  </tbody>
+                </table>
+              </div>
+              <div id="bh2-availability" style="display: none">
+                <h4>BH-2 Hostel</h4>
+                <table class="availability-table">
+                  <thead>
+                    <tr>
+                      <th>Floor</th>
+                      <th>Rooms</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="bh2-availability-body">
+                    <!-- Will be populated by JavaScript -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Allotment Result Page -->
+          <div id="allotment-page" class="page" style="display: none">
+            <h1 class="page-title">Room Allotment Result</h1>
+            <div class="card">
+              <div id="allotment-result">
+                <h3>Your Room Allotment Status</h3>
+                <p id="allotment-message">
+                  You have not been allotted a room yet.
+                </p>
+                <div id="allotted-room" style="display: none">
+                  <p>
+                    <strong>Room Number:</strong>
+                    <span id="allotted-room-number"></span>
+                  </p>
+                  <p>
+                    <strong>Hostel Block:</strong>
+                    <span id="allotted-hostel-block"></span>
+                  </p>
+                  <p>
+                    <strong>Room Type:</strong>
+                    <span id="allotted-room-type"></span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Profile Page -->
+          <div id="profile-page" class="page" style="display: none">
+            <h1 class="page-title">Student Profile</h1>
+            <div class="card">
+              <div class="profile-info">
+                <div>
+                  <div class="info-group">
+                    <label>Name</label>
+                    <p id="profile-name">John Doe</p>
+                  </div>
+                  <div class="info-group">
+                    <label>Email</label>
+                    <p id="profile-email">john.doe@example.com</p>
+                  </div>
+                  <div class="info-group">
+                    <label>Gender</label>
+                    <p id="profile-gender">Male</p>
+                  </div>
+                </div>
+                <div>
+                  <div class="info-group">
+                    <label>Room Status</label>
+                    <p id="profile-room-status">Not Registered</p>
+                  </div>
+                  <div
+                    class="info-group"
+                    id="profile-room-details"
+                    style="display: none"
+                  >
+                    <label>Allotted Room</label>
+                    <p id="profile-room-number">N/A</p>
+                  </div>
+                </div>
+              </div>
+              <div style="margin-top: 20px">
+                <button class="btn" id="edit-profile-btn">Edit Profile</button>
+                <button
+                  class="btn btn-danger"
+                  id="profile-logout-btn"
+                  style="float: right"
+                >
+                  Logout
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Admin Page -->
+          <div id="admin-page" class="page" style="display: none">
+            <h1 class="page-title">Admin Panel</h1>
+            <div class="card">
+              <h3>Room Allotment</h3>
+              <p>Allot rooms to registered students</p>
+              <button class="btn" id="allot-rooms-btn">Allot Rooms</button>
+              <div
+                id="allotment-result-message"
+                class="success-message"
+                style="display: none; margin-top: 15px"
+              >
+                <!-- Will be populated by JavaScript -->
+              </div>
+            </div>
+            <div class="card admin-panel">
+              <h3>Student Registrations</h3>
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Hostel Block</th>
+                    <th>Room Type</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-registrations-body">
+                  <!-- Will be populated by JavaScript -->
+                </tbody>
+              </table>
+            </div>
+            <div class="card admin-panel">
+              <h3>Room Allotments</h3>
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Hostel Block</th>
+                    <th>Room Type</th>
+                    <th>Room Number</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-allotments-body">
+                  <!-- Will be populated by JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
+      <!-- Footer -->
+      <footer>
+        <div class="container">
+          <p>&copy; 2025 Hostel Room Allocation System. All rights reserved.</p>
+        </div>
+      </footer>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div id="edit-profile-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Edit Profile</h2>
+          <button class="modal-close">&times;</button>
+        </div>
+        <form id="edit-profile-form">
+          <div class="form-group">
+            <label for="edit-name">Full Name</label>
+            <input type="text" id="edit-name" class="form-control" required />
+          </div>
+          <div class="form-group">
+            <label for="edit-email">Email</label>
+            <input type="email" id="edit-email" class="form-control" required />
+          </div>
+          <div class="form-group">
+            <label for="edit-gender">Gender</label>
+            <select id="edit-gender" class="form-control" required>
+              <option value="">Select Gender</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <button type="submit" class="btn">Save Changes</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Chatbot (REMOVED) -->
+
+    <!-- ===== NEW CHATBOT HTML ===== -->
+    <button id="chatbot-toggle" class="chatbot-toggle" aria-label="Open chat">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+    </button>
+
+    <div id="chatbot-container" class="chatbot-container">
+      <div class="chatbot-header">
+        <h3>Hostel Assistant</h3>
+        <button id="chatbot-close-btn" class="chatbot-close-btn" aria-label="Close chat">&times;</button>
+      </div>
+      <div id="chatbot-messages" class="chatbot-messages">
+        <div class="chat-message bot-message">
+          Hello! How can I help you with hostel allocation today?
+        </div>
+      </div>
+      <form id="chatbot-input-form" class="chatbot-input-form">
+        <input type="text" id="chatbot-input" class="form-control" placeholder="Type a message..." autocomplete="off">
+        <button type="submit" class="chatbot-send-btn" aria-label="Send message">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+        </button>
+      </form>
+    </div>
+    <!-- ===== END CHATBOT HTML ===== -->
+
+
+    <!-- Embedded JavaScript -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+      import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics.js";
+      import { getAuth } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+      import { getFirestore } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+      const firebaseConfig = {
+        apiKey: "AIzaSyDQ8xp9waYDTCUUX2IirhZjReUotNgeP6U",
+        authDomain: "hostel-management-60868.firebaseapp.com",
+        projectId: "hostel-management-60868",
+        storageBucket: "hostel-management-60868.firebasestorage.app",
+        messagingSenderId: "473952323728",
+        appId: "1:473952323728:web:9e7e2114064990627db015",
+        measurementId: "G-BX181DSNLV"
+      };
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+      // --- NEW API URL ---
+      const API_URL = 'http://127.0.0.1:5000/api'; // Your Flask server
+    
+      // Application State
+      const state = {
+        currentUser: null,
+        users: [],
+        registrations: [],
+        allotments: [],
+        rooms: {
+          omv: {
+            "001-020": { total: 20, available: 20 },
+            "100-120": { total: 20, available: 20 },
+            "200-220": { total: 20, available: 20 },
+          },
+          bh2: {
+            floor1: { total: 20, available: 20 },
+            floor2: { total: 20, available: 20 },
+            floor3: { total: 20, available: 20 },
+            floor4: { total: 20, available: 20 },
+          },
+        },
+        chatHistory: [], // To store conversation context
+      };
+
+      // --- IMPORTANT: PASTE YOUR OPENROUTER API KEY HERE ---
+      // You need to get your own key from https://openrouter.ai/
+      const OPENROUTER_API_KEY = "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"; // Or "REPLACE_WITH_YOUR_OPENROUTER_KEY"
+      // ---
+
+      // DOM Elements
+      const pages = document.querySelectorAll(".page");
+      const navLinks = document.querySelectorAll(".nav-link");
+
+      // Auth Page elements
+      const loginTabBtn = document.getElementById("login-tab-btn");
+      const signupTabBtn = document.getElementById("signup-tab-btn");
+      const loginFormContainer = document.getElementById("login-form-container");
+      const signupFormContainer =
+        document.getElementById("signup-form-container");
+      const loginForm = document.getElementById("login-form");
+      const signupForm = document.getElementById("signup-form");
+      const loginError = document.getElementById("login-error");
+
+      const registrationForm = document.getElementById("registration-form");
+      const editProfileForm = document.getElementById("edit-profile-form");
+      const hostelBlockSelect = document.getElementById("hostel-block");
+      const editProfileBtn = document.getElementById("edit-profile-btn");
+      const logoutBtn = document.getElementById("logout-btn");
+      const profileLogoutBtn = document.getElementById("profile-logout-btn");
+      const editProfileModal = document.getElementById("edit-profile-modal");
+      const modalClose = document.querySelector(".modal-close");
+      const allotRoomsBtn = document.getElementById("allot-rooms-btn");
+
+      // Chatbot elements (REMOVED)
+      // --- NEW CHATBOT ELEMENTS ---
+      const chatbotToggle = document.getElementById("chatbot-toggle");
+      const chatbotContainer = document.getElementById("chatbot-container");
+      const chatbotCloseBtn = document.getElementById("chatbot-close-btn");
+      const chatbotForm = document.getElementById("chatbot-input-form");
+      const chatbotInput = document.getElementById("chatbot-input");
+      const chatbotMessages = document.getElementById("chatbot-messages");
+
+      // Theme Switcher elements
+      const themeSwitcher = document.getElementById("theme-switcher");
+      const themeIconMoon = document.getElementById("theme-icon-moon");
+      const themeIconSun = document.getElementById("theme-icon-sun");
+
+      // Initialize the application
+      function init() {
+        // Apply saved theme
+        const savedTheme = localStorage.getItem("theme") || "light";
+        applyTheme(savedTheme);
+
+        // Load data from localStorage with error handling
+        try {
+          state.users = JSON.parse(localStorage.getItem("users")) || [];
+          state.registrations =
+            JSON.parse(localStorage.getItem("registrations")) || [];
+          state.allotments =
+            JSON.parse(localStorage.getItem("allotments")) || [];
+
+          // Check if user is logged in
+          const loggedInUser = localStorage.getItem("currentUser");
+          if (loggedInUser) {
+            state.currentUser = JSON.parse(loggedInUser);
+            showPage("dashboard");
+          } else {
+             // Default to auth page and ensure it's displayed
+            showPage("auth");
+            document.getElementById('auth-page').style.display = 'flex'; // Use flex for centering
+            // Set initial active link
+             navLinks.forEach(link => link.classList.remove('active'));
+             document.querySelector('.nav-link[data-page="auth"]').classList.add('active');
+          }
+        } catch (error) {
+          console.error("Error loading data from localStorage:", error);
+          // Reset data if corrupted
+          state.users = [];
+          state.registrations = [];
+          state.allotments = [];
+          localStorage.clear();
+          showPage("auth"); // Default to auth page on error
+          document.getElementById('auth-page').style.display = 'flex'; // Use flex for centering
+          // Set initial active link
+           navLinks.forEach(link => link.classList.remove('active'));
+           document.querySelector('.nav-link[data-page="auth"]').classList.add('active');
+        }
+
+        // Set up event listeners
+        setupEventListeners();
+
+        // Update room availability based on allotments
+        updateRoomAvailability();
+      }
+
+      // Set up event listeners
+      function setupEventListeners() {
+        // Navigation
+        navLinks.forEach((link) => {
+          link.addEventListener("click", (e) => {
+            e.preventDefault();
+            const page = link.getAttribute("data-page");
+
+            // Check if user is logged in for protected pages
+            if (
+              [
+                "dashboard",
+                "registration",
+                "allotment",
+                "profile",
+                "admin",
+              ].includes(page) &&
+              !state.currentUser
+            ) {
+              showPage("auth"); // Redirect to auth page if not logged in
+              return;
+            }
+
+            showPage(page);
+          });
+        });
+
+        // Auth Tabs
+        loginTabBtn.addEventListener("click", () => switchAuthTab("login"));
+        signupTabBtn.addEventListener("click", () => switchAuthTab("signup"));
+
+        // Authentication forms
+        loginForm.addEventListener("submit", handleLogin);
+        signupForm.addEventListener("submit", handleSignup);
+
+        // Room registration
+        if(registrationForm) { // Add check as it might not exist if only auth page is shown
+             registrationForm.addEventListener("submit", handleRegistration);
+        }
+        
+        // Hostel block change (Add check)
+        if (hostelBlockSelect) {
+            hostelBlockSelect.addEventListener(
+              "change",
+              updateRoomAvailabilityDisplay
+            );
+        }
+
+        // Edit profile (Add check)
+         if (editProfileBtn) {
+            editProfileBtn.addEventListener("click", showEditProfileModal);
+         }
+         if (editProfileForm) {
+            editProfileForm.addEventListener("submit", handleEditProfile);
+         }
+
+
+        // Logout buttons (Add checks)
+        if (logoutBtn) {
+            logoutBtn.addEventListener("click", handleLogout);
+        }
+        if (profileLogoutBtn) {
+            profileLogoutBtn.addEventListener("click", handleLogout);
+        }
+
+        // Modal close (Add check)
+        if (modalClose) {
+            modalClose.addEventListener("click", () => {
+              if (editProfileModal) editProfileModal.style.display = "none";
+            });
+        }
+        
+        // Admin room allotment (Add check)
+        if (allotRoomsBtn) {
+           allotRoomsBtn.addEventListener("click", handleAllotRooms);
+        }
+
+
+        // Chatbot Listeners (REMOVED)
+        // --- NEW CHATBOT LISTENERS ---
+        if (chatbotToggle) {
+            chatbotToggle.addEventListener("click", toggleChatbot);
+        }
+        if (chatbotCloseBtn) {
+            chatbotCloseBtn.addEventListener("click", toggleChatbot);
+        }
+        if (chatbotForm) {
+            chatbotForm.addEventListener("submit", handleChatMessage);
+        }
+        
+        // Theme switcher
+        themeSwitcher.addEventListener("click", handleThemeSwitch);
+
+        // Close modal when clicking outside (Add check)
+        window.addEventListener("click", (e) => {
+          if (editProfileModal && e.target === editProfileModal) {
+            editProfileModal.style.display = "none";
+          }
+        });
+      }
+
+      // Handle theme switching
+      function handleThemeSwitch() {
+        const currentTheme = document.body.classList.contains("dark-theme") ? "dark" : "light";
+        const newTheme = currentTheme === "dark" ? "light" : "dark";
+        localStorage.setItem("theme", newTheme);
+        applyTheme(newTheme);
+      }
+
+      // Apply theme to the UI
+      function applyTheme(theme) {
+        if (theme === "dark") {
+            document.body.classList.add("dark-theme");
+            if (themeIconMoon) themeIconMoon.style.display = "none";
+            if (themeIconSun) themeIconSun.style.display = "block";
+        } else {
+            document.body.classList.remove("dark-theme");
+             if (themeIconMoon) themeIconMoon.style.display = "block";
+             if (themeIconSun) themeIconSun.style.display = "none";
+        }
+      }
+
+      // Function to switch between Login and Sign Up tabs
+      function switchAuthTab(tab) {
+        if (loginTabBtn && signupTabBtn && loginFormContainer && signupFormContainer) {
+            if (tab === "login") {
+              loginTabBtn.classList.add("active");
+              signupTabBtn.classList.remove("active");
+              loginFormContainer.style.display = "block";
+              signupFormContainer.style.display = "none";
+            } else {
+              loginTabBtn.classList.remove("active");
+              signupTabBtn.classList.add("active");
+              loginFormContainer.style.display = "none";
+              signupFormContainer.style.display = "block";
+            }
+            // Hide any previous error messages
+            if(loginError) loginError.style.display = "none";
+        }
+      }
+
+      // Show specific page and hide others
+      function showPage(pageName) {
+        pages.forEach((page) => {
+          page.style.display = "none";
+        });
+        
+        const targetPage = document.getElementById(`${pageName}-page`);
+        if(targetPage) {
+             // Use 'flex' for auth page to enable centering
+             if (pageName === 'auth') {
+                 targetPage.style.display = "flex";
+             } else {
+                 targetPage.style.display = "block";
+             }
+        } else {
+             console.error(`Page with ID ${pageName}-page not found.`);
+             // Fallback to auth page if target not found
+             const authPage = document.getElementById('auth-page');
+             if (authPage) authPage.style.display = 'flex'; // Use flex
+             pageName = 'auth'; // Update pageName for nav link handling
+        }
+
+
+        // Update active nav link
+        navLinks.forEach((link) => {
+          const linkPage = link.getAttribute("data-page");
+          // Highlight "Login / Sign Up" for the auth page
+          if (linkPage === pageName) { // Simplified condition
+            link.classList.add("active");
+          } else {
+            link.classList.remove("active");
+          }
+        });
+
+        // When showing auth page, default to login tab
+        if (pageName === "auth") {
+          switchAuthTab("login");
+        }
+
+        // Update page-specific content only if elements exist
+        if (pageName === "dashboard") {
+          updateDashboard();
+        } else if (pageName === "allotment") {
+          updateAllotmentResult();
+        } else if (pageName === "profile") {
+          updateProfile();
+        } else if (pageName === "registration") {
+          updateRoomAvailabilityDisplay();
+        } else if (pageName === "admin") {
+          updateAdminPanel();
+        }
+      }
+
+      // Handle login
+      function handleLogin(e) {
+        e.preventDefault();
+        const emailInput = document.getElementById("login-email");
+        const passwordInput = document.getElementById("login-password");
+        if (!emailInput || !passwordInput || !loginError) return; // Add checks
+
+        const email = emailInput.value;
+        const password = passwordInput.value;
+
+
+        const user = state.users.find(
+          (u) => u.email === email && u.password === password
+        );
+
+        if (user) {
+          state.currentUser = user;
+          localStorage.setItem("currentUser", JSON.stringify(user));
+          showPage("dashboard");
+          // updateDashboard() is called within showPage
+          loginError.style.display = "none";
+        } else {
+          // Check if email exists
+          const emailExists = state.users.find((u) => u.email === email);
+          if (!emailExists) {
+            loginError.textContent = "Email not found. Please sign up first.";
+          } else {
+            loginError.textContent = "Invalid password. Please try again.";
+          }
+          loginError.style.display = "block";
+        }
+      }
+
+      // Handle signup
+      function handleSignup(e) {
+        e.preventDefault();
+         const nameInput = document.getElementById("signup-name");
+         const emailInput = document.getElementById("signup-email");
+         const passwordInput = document.getElementById("signup-password");
+         const genderInput = document.getElementById("signup-gender");
+         if(!nameInput || !emailInput || !passwordInput || !genderInput) return; // Add checks
+
+        const name = nameInput.value;
+        const email = emailInput.value;
+        const password = passwordInput.value;
+        const gender = genderInput.value;
+
+        // Check if user already exists
+        if (state.users.find((u) => u.email === email)) {
+          console.warn("User with this email already exists");
+           // Display error in UI instead of alert
+           const signupErrorDiv = document.createElement('div');
+           signupErrorDiv.className = 'error-message';
+           signupErrorDiv.textContent = 'User with this email already exists.';
+           signupErrorDiv.style.marginTop = '1rem';
+           // Remove previous error if exists
+           const existingError = signupForm.querySelector('.error-message');
+           if (existingError) existingError.remove();
+           signupForm.appendChild(signupErrorDiv);
+          return;
+        }
+
+        const newUser = {
+          id: Date.now().toString(),
+          name,
+          email,
+          password,
+          gender,
+        };
+
+        state.users.push(newUser);
+        localStorage.setItem("users", JSON.stringify(state.users));
+
+        console.log("Registration successful! Please login.");
+         // Display success message briefly before switching
+         const successDiv = document.createElement('div');
+         successDiv.className = 'success-message';
+         successDiv.textContent = 'Registration successful! Please login.';
+         successDiv.style.marginTop = '1rem';
+         const existingError = signupForm.querySelector('.error-message');
+         if (existingError) existingError.remove();
+         signupForm.appendChild(successDiv);
+
+         setTimeout(() => {
+             successDiv.remove(); // Remove success message
+             switchAuthTab("login"); // Switch to login tab after successful registration
+             signupForm.reset(); // Clear the form
+         }, 2000);
+
+      }
+
+      // Handle room registration
+      function handleRegistration(e) {
+        e.preventDefault();
+        if (!state.currentUser) {
+          console.warn("Please login first");
+          showPage("auth");
+          return;
+        }
+        
+        const hostelBlockInput = document.getElementById("hostel-block");
+        const roomTypeInput = document.getElementById("room-type");
+        const successMsg = document.getElementById("registration-success");
+        const errorMsg = document.getElementById("registration-error");
+        if(!hostelBlockInput || !roomTypeInput || !successMsg || !errorMsg) return; // Add checks
+
+
+        const hostelBlock = hostelBlockInput.value;
+        const roomType = roomTypeInput.value;
+
+        // Check if user already has a registration
+        const existingRegistrationIndex = state.registrations.findIndex(
+          (r) => r.userId === state.currentUser.id
+        );
+
+        if (existingRegistrationIndex !== -1) {
+          // Update existing registration
+          state.registrations[existingRegistrationIndex].hostelBlock =
+            hostelBlock;
+          state.registrations[existingRegistrationIndex].roomType = roomType;
+          state.registrations[existingRegistrationIndex].status = "waiting";
+        } else {
+          // Create new registration
+          const registration = {
+            id: Date.now().toString(),
+            userId: state.currentUser.id,
+            hostelBlock,
+            roomType,
+            status: "waiting",
+          };
+
+          state.registrations.push(registration);
+        }
+
+        localStorage.setItem(
+          "registrations",
+          JSON.stringify(state.registrations)
+        );
+
+        successMsg.style.display = "block";
+        errorMsg.style.display = "none";
+        
+        // Hide message and redirect after timeout
+        setTimeout(() => {
+           successMsg.style.display = "none"; // Hide message
+           showPage("dashboard");
+           // updateDashboard() called within showPage
+        }, 1500);
+
+      }
+
+      // Update room availability display
+      function updateRoomAvailabilityDisplay() {
+        const omvDiv = document.getElementById("omv-availability");
+        const bh2Div = document.getElementById("bh2-availability");
+        const omvBody = document.getElementById("omv-availability-body");
+        const bh2Body = document.getElementById("bh2-availability-body");
+        
+        // Ensure elements exist before proceeding
+        if (!hostelBlockSelect || !omvDiv || !bh2Div || !omvBody || !bh2Body) return;
+
+        const hostelBlock = hostelBlockSelect.value;
+        omvDiv.style.display = hostelBlock === "omv" ? "block" : "none";
+        bh2Div.style.display = hostelBlock === "bh2" ? "block" : "none";
+
+
+        // Update OMV availability table
+        omvBody.innerHTML = ""; // Clear previous content
+        for (const [range, data] of Object.entries(state.rooms.omv)) {
+          const row = document.createElement("tr");
+          const rangeCell = document.createElement("td");
+          rangeCell.textContent = range;
+
+          const statusCell = document.createElement("td");
+          statusCell.textContent =
+            data.available > 0 ? `${data.available} Available` : "Occupied"; // Show count
+          statusCell.className =
+            data.available > 0 ? "room-available" : "room-occupied";
+
+          row.appendChild(rangeCell);
+          row.appendChild(statusCell);
+          omvBody.appendChild(row);
+        }
+
+        // Update BH-2 availability table
+        bh2Body.innerHTML = ""; // Clear previous content
+        let floorNum = 1;
+        for (const [floor, data] of Object.entries(state.rooms.bh2)) {
+          const row = document.createElement("tr");
+
+          const floorCell = document.createElement("td");
+          floorCell.textContent = `${floorNum}${getOrdinalSuffix(
+            floorNum
+          )} Floor`;
+
+          const roomsCell = document.createElement("td");
+          const startRoom = (floorNum - 1) * 20 + 1;
+          const endRoom = floorNum * 20;
+          roomsCell.textContent = `${startRoom
+            .toString()
+            .padStart(3, "0")}-${endRoom.toString().padStart(3, "0")}`;
+
+          const statusCell = document.createElement("td");
+           statusCell.textContent =
+            data.available > 0 ? `${data.available} Available` : "Occupied"; // Show count
+          statusCell.className =
+            data.available > 0 ? "room-available" : "room-occupied";
+
+          row.appendChild(floorCell);
+          row.appendChild(roomsCell);
+          row.appendChild(statusCell);
+          bh2Body.appendChild(row);
+
+          floorNum++;
+        }
+      }
+
+      // Helper function for ordinal suffixes
+      function getOrdinalSuffix(num) {
+        if (num % 10 === 1 && num % 100 !== 11) return "st";
+        if (num % 10 === 2 && num % 100 !== 12) return "nd";
+        if (num % 10 === 3 && num % 100 !== 13) return "rd";
+        return "th";
+      }
+
+      // Update room availability based on allotments
+      function updateRoomAvailability() {
+        // Reset room availability counts first
+        for (const blockData of Object.values(state.rooms)) {
+             for (const rangeData of Object.values(blockData)) {
+                 rangeData.available = rangeData.total;
+             }
+        }
+
+
+        // Decrement availability based on current allotments
+        for (const allotment of state.allotments) {
+          const block = allotment.hostelBlock;
+          const roomNum = parseInt(allotment.roomNumber);
+
+          if (block === "omv" && state.rooms.omv) {
+            let rangeKey = "";
+            if (roomNum >= 1 && roomNum <= 20) rangeKey = "001-020";
+            else if (roomNum >= 100 && roomNum <= 120) rangeKey = "100-120";
+            else if (roomNum >= 200 && roomNum <= 220) rangeKey = "200-220";
+
+            if (rangeKey && state.rooms.omv[rangeKey] && state.rooms.omv[rangeKey].available > 0) {
+              state.rooms.omv[rangeKey].available--;
+            }
+          } else if (block === "bh2" && state.rooms.bh2) {
+            const floorNum = Math.ceil(roomNum / 20);
+            const floorKey = `floor${floorNum}`;
+            if (state.rooms.bh2[floorKey] && state.rooms.bh2[floorKey].available > 0) {
+              state.rooms.bh2[floorKey].available--;
+            }
+          }
+        }
+      }
+
+
+      // Update dashboard with user-specific information
+      function updateDashboard() {
+        if (!state.currentUser) return;
+        
+        const welcomeMsg = document.getElementById("welcome-message");
+        const allocationStatus = document.getElementById("allocation-status");
+        const roomDetails = document.getElementById("room-details");
+        const roomNumber = document.getElementById("room-number");
+        
+        if(!welcomeMsg || !allocationStatus || !roomDetails || !roomNumber) return; // Add checks
+
+
+        welcomeMsg.textContent = `Welcome, ${state.currentUser.name}`;
+
+        const registration = state.registrations.find(
+          (r) => r.userId === state.currentUser.id
+        );
+        const allotment = state.allotments.find(
+          (a) => a.userId === state.currentUser.id
+        );
+
+
+        if (allotment) {
+          allocationStatus.textContent = "Allotted";
+          roomDetails.style.display = "block";
+          roomNumber.textContent = `${allotment.roomNumber} (${allotment.hostelBlock.toUpperCase()})`; // Show block too
+        } else if (registration) {
+          allocationStatus.textContent = registration.status; // Show detailed status
+          roomDetails.style.display = "none";
+        } else {
+          allocationStatus.textContent = "Not Registered";
+          roomDetails.style.display = "none";
+        }
+
+        // --- Update Live Stats Charts ---
+        try {
+            // OMV Stats
+            const omvChart = document.getElementById("omv-chart");
+            const omvPercentage = document.getElementById("omv-percentage");
+            const omvLabel = document.querySelector("#omv-stats .chart-label");
+
+            if (omvChart && omvPercentage && omvLabel) {
+                const omvTotal = state.rooms.omv["001-020"].total + state.rooms.omv["100-120"].total + state.rooms.omv["200-220"].total;
+                const omvAvailable = state.rooms.omv["001-020"].available + state.rooms.omv["100-120"].available + state.rooms.omv["200-220"].available;
+                const omvFilled = omvTotal - omvAvailable;
+                const omvPercentFilled = (omvTotal > 0) ? (omvFilled / omvTotal) * 100 : 0;
+
+                omvChart.style.setProperty('--percentage', omvPercentFilled.toFixed(0));
+                omvChart.style.setProperty('--color-progress', 'var(--primary-color)'); // Use blue for filled
+                omvChart.style.setProperty('--color-base', 'var(--border-color)'); // Use grey for empty
+                omvPercentage.textContent = `${omvPercentFilled.toFixed(0)}%`;
+                omvLabel.textContent = `${omvFilled} / ${omvTotal} Rooms (OMV)`;
+            }
+
+            // BH-2 Stats
+            const bh2Chart = document.getElementById("bh2-chart");
+            const bh2Percentage = document.getElementById("bh2-percentage");
+            const bh2Label = document.querySelector("#bh2-stats .chart-label");
+
+            if (bh2Chart && bh2Percentage && bh2Label) {
+                const bh2Total = state.rooms.bh2.floor1.total + state.rooms.bh2.floor2.total + state.rooms.bh2.floor3.total + state.rooms.bh2.floor4.total;
+                const bh2Available = state.rooms.bh2.floor1.available + state.rooms.bh2.floor2.available + state.rooms.bh2.floor3.available + state.rooms.bh2.floor4.available;
+                const bh2Filled = bh2Total - bh2Available;
+                const bh2PercentFilled = (bh2Total > 0) ? (bh2Filled / bh2Total) * 100 : 0;
+
+                bh2Chart.style.setProperty('--percentage', bh2PercentFilled.toFixed(0));
+                bh2Chart.style.setProperty('--color-progress', 'var(--primary-color)');
+                bh2Chart.style.setProperty('--color-base', 'var(--border-color)');
+                bh2Percentage.textContent = `${bh2PercentFilled.toFixed(0)}%`;
+                bh2Label.textContent = `${bh2Filled} / ${bh2Total} Rooms (BH-2)`;
+            }
+
+            // Allotment Stats
+            const allotmentChart = document.getElementById("allotment-chart");
+            const allotmentPercentage = document.getElementById("allotment-percentage");
+            const allotmentLabel = document.querySelector("#allotment-stats .chart-label");
+
+            if (allotmentChart && allotmentPercentage && allotmentLabel) {
+                const omvTotal = state.rooms.omv["001-020"].total + state.rooms.omv["100-120"].total + state.rooms.omv["200-220"].total;
+                const bh2Total = state.rooms.bh2.floor1.total + state.rooms.bh2.floor2.total + state.rooms.bh2.floor3.total + state.rooms.bh2.floor4.total;
+                const totalRooms = omvTotal + bh2Total;
+                const totalAllotted = state.allotments.length;
+                const allotmentPercent = (totalRooms > 0) ? (totalAllotted / totalRooms) * 100 : 0;
+
+                allotmentChart.style.setProperty('--percentage', allotmentPercent.toFixed(0));
+                allotmentChart.style.setProperty('--color-progress', 'var(--success-color)'); // Use green for allotted
+                allotmentChart.style.setProperty('--color-base', 'var(--border-color)');
+                allotmentPercentage.textContent = `${allotmentPercent.toFixed(0)}%`;
+                allotmentLabel.textContent = `${totalAllotted} / ${totalRooms} Total Allotted`;
+            }
+
+        } catch (error) {
+            console.error("Error updating dashboard stats:", error);
+        }
+        // --- End Update Live Stats ---
+      }
+
+      // Update allotment result page
+      function updateAllotmentResult() {
+        if (!state.currentUser) return;
+        
+         const allotmentMessage = document.getElementById("allotment-message");
+         const allottedRoomDiv = document.getElementById("allotted-room");
+         const allottedRoomNumberSpan = document.getElementById("allotted-room-number");
+         const allottedHostelBlockSpan = document.getElementById("allotted-hostel-block");
+         const allottedRoomTypeSpan = document.getElementById("allotted-room-type");
+         
+         if(!allotmentMessage || !allottedRoomDiv || !allottedRoomNumberSpan || !allottedHostelBlockSpan || !allottedRoomTypeSpan) return; // Add checks
+
+
+        const allotment = state.allotments.find(
+          (a) => a.userId === state.currentUser.id
+        );
+        const registration = state.registrations.find(
+           (r) => r.userId === state.currentUser.id
+         ); // Check registration too
+
+
+        if (allotment) {
+          allotmentMessage.textContent =
+            "Congratulations! You have been allotted a room.";
+          allottedRoomDiv.style.display = "block";
+          allottedRoomNumberSpan.textContent = allotment.roomNumber;
+          allottedHostelBlockSpan.textContent =
+            allotment.hostelBlock.toUpperCase(); // Consistent casing
+          allottedRoomTypeSpan.textContent = allotment.roomType.charAt(0).toUpperCase() + allotment.roomType.slice(1); // Capitalize
+        } else if (registration) {
+             // If registered but not allotted
+             allotmentMessage.textContent = `Your registration status is: ${registration.status}. Please check back later.`;
+             allottedRoomDiv.style.display = "none";
+        } else {
+             // If not even registered
+           allotmentMessage.textContent = "You have not registered for a room yet. Please register first.";
+           allottedRoomDiv.style.display = "none";
+        }
+      }
+
+      // Update profile page
+      function updateProfile() {
+        if (!state.currentUser) return;
+        
+        const profileName = document.getElementById("profile-name");
+        const profileEmail = document.getElementById("profile-email");
+        const profileGender = document.getElementById("profile-gender");
+        const roomStatus = document.getElementById("profile-room-status");
+        const roomDetails = document.getElementById("profile-room-details");
+        const profileRoomNumber = document.getElementById(
+          "profile-room-number"
+        );
+        
+        if(!profileName || !profileEmail || !profileGender || !roomStatus || !roomDetails || !profileRoomNumber) return; // Add checks
+
+
+        profileName.textContent = state.currentUser.name;
+        profileEmail.textContent = state.currentUser.email;
+        profileGender.textContent = state.currentUser.gender.charAt(0).toUpperCase() + state.currentUser.gender.slice(1); // Capitalize
+
+
+        const registration = state.registrations.find(
+          (r) => r.userId === state.currentUser.id
+        );
+        const allotment = state.allotments.find(
+          (a) => a.userId === state.currentUser.id
+        );
+
+
+        if (allotment) {
+          roomStatus.textContent = "Allotted";
+          roomDetails.style.display = "block";
+           profileRoomNumber.textContent = `${allotment.roomNumber} (${allotment.hostelBlock.toUpperCase()})`; // Show block
+        } else if (registration) {
+          roomStatus.textContent = registration.status; // Show detailed status
+          roomDetails.style.display = "none";
+        } else {
+          roomStatus.textContent = "Not Registered";
+          roomDetails.style.display = "none";
+        }
+      }
+
+      // Show edit profile modal
+      function showEditProfileModal() {
+        if (!state.currentUser || !editProfileModal) return; // Add checks
+        
+        const editName = document.getElementById("edit-name");
+        const editEmail = document.getElementById("edit-email");
+        const editGender = document.getElementById("edit-gender");
+        
+        if(!editName || !editEmail || !editGender) return; // Add checks
+
+
+        editName.value = state.currentUser.name;
+        editEmail.value = state.currentUser.email;
+        editGender.value = state.currentUser.gender;
+
+        editProfileModal.style.display = "flex";
+      }
+
+      // Handle edit profile
+      function handleEditProfile(e) {
+        e.preventDefault();
+        
+        const editName = document.getElementById("edit-name");
+        const editEmail = document.getElementById("edit-email");
+        const editGender = document.getElementById("edit-gender");
+        if(!editName || !editEmail || !editGender || !editProfileModal) return; // Add checks
+
+
+        const name = editName.value;
+        const email = editEmail.value;
+        const gender = editGender.value;
+
+        // Basic validation (optional)
+        if (!name || !email || !gender) {
+             console.error("All fields are required for profile update.");
+             // Show error in modal
+             return;
+        }
+
+
+        // Update user in state
+        state.currentUser.name = name;
+        state.currentUser.email = email;
+        state.currentUser.gender = gender;
+
+        // Update user in users array
+        const userIndex = state.users.findIndex(
+          (u) => u.id === state.currentUser.id
+        );
+        if (userIndex !== -1) {
+          state.users[userIndex] = {...state.currentUser}; // Update with a copy
+        }
+
+        // Save to localStorage
+        localStorage.setItem("currentUser", JSON.stringify(state.currentUser));
+        localStorage.setItem("users", JSON.stringify(state.users));
+
+        // Close modal and update profile
+        editProfileModal.style.display = "none";
+        updateProfile(); // Update profile page display
+        updateDashboard(); // Update dashboard welcome message if needed
+
+        console.log("Profile updated successfully!");
+        // Optionally show a success message in the UI
+      }
+
+      // Handle logout
+      function handleLogout() {
+        state.currentUser = null;
+        localStorage.removeItem("currentUser");
+        showPage("auth"); // Redirect to auth page
+      }
+
+      // Update admin panel
+      function updateAdminPanel() {
+        const registrationsBody = document.getElementById("admin-registrations-body");
+        const allotmentsBody = document.getElementById("admin-allotments-body");
+        if (!registrationsBody || !allotmentsBody) return; // Add checks
+
+
+        // Update registrations table
+        registrationsBody.innerHTML = ""; // Clear previous content
+        for (const registration of state.registrations) {
+          const user = state.users.find((u) => u.id === registration.userId);
+          if (user) {
+            const row = document.createElement("tr");
+
+            // Simplified cell creation
+            ['name', 'email'].forEach(key => {
+                 const cell = document.createElement("td");
+                 cell.textContent = user[key];
+                 row.appendChild(cell);
+            });
+
+
+            const blockCell = document.createElement("td");
+            blockCell.textContent = registration.hostelBlock.toUpperCase();
+            row.appendChild(blockCell);
+
+            const typeCell = document.createElement("td");
+            typeCell.textContent = registration.roomType.charAt(0).toUpperCase() + registration.roomType.slice(1);
+            row.appendChild(typeCell);
+
+            const statusCell = document.createElement("td");
+            statusCell.textContent = registration.status;
+            row.appendChild(statusCell);
+
+            registrationsBody.appendChild(row);
+          }
+        }
+
+        // Update allotments table
+        allotmentsBody.innerHTML = ""; // Clear previous content
+        for (const allotment of state.allotments) {
+          const user = state.users.find((u) => u.id === allotment.userId);
+          if (user) {
+            const row = document.createElement("tr");
+
+             ['name', 'email'].forEach(key => {
+                 const cell = document.createElement("td");
+                 cell.textContent = user[key];
+                 row.appendChild(cell);
+            });
+
+            const blockCell = document.createElement("td");
+            blockCell.textContent = allotment.hostelBlock.toUpperCase();
+            row.appendChild(blockCell);
+
+            const typeCell = document.createElement("td");
+            typeCell.textContent = allotment.roomType.charAt(0).toUpperCase() + allotment.roomType.slice(1);
+            row.appendChild(typeCell);
+
+            const roomCell = document.createElement("td");
+            roomCell.textContent = allotment.roomNumber;
+            row.appendChild(roomCell);
+
+            allotmentsBody.appendChild(row);
+          }
+        }
+      }
+
+
+      // Handle room allotment
+      function handleAllotRooms() {
+         const messageDiv = document.getElementById("allotment-result-message");
+         if(!messageDiv) return; // Add check
+
+        // Basic Allotment Logic (First come, first served within block preference)
+        
+        // --- Refined Allotment Logic ---
+        const newlyAllotted = [];
+        const waitingRegistrations = state.registrations.filter(r => r.status.startsWith('waiting')); // Get only waiting
+
+        // Keep track of available rooms during this allotment cycle
+        const currentAvailability = JSON.parse(JSON.stringify(state.rooms)); // Deep copy
+
+        for (const registration of waitingRegistrations) {
+            const block = registration.hostelBlock;
+            let roomAssigned = false;
+
+            if (block === "omv" && currentAvailability.omv) {
+                for (const range of ["001-020", "100-120", "200-220"]) { // Define order
+                     if (currentAvailability.omv[range] && currentAvailability.omv[range].available > 0) {
+                         let startRoom, endRoom;
+                         if (range === "001-020") { startRoom = 1; endRoom = 20; }
+                         else if (range === "100-120") { startRoom = 100; endRoom = 120; }
+                         else { startRoom = 200; endRoom = 220; }
+
+                         for (let roomNum = startRoom; roomNum <= endRoom; roomNum++) {
+                             const roomStr = roomNum.toString().padStart(3, "0");
+                             // Check against *newly* allotted rooms in this cycle
+                             const isNewlyTaken = newlyAllotted.some(a => a.hostelBlock === "omv" && a.roomNumber === roomStr);
+                             // Also check against *previously* allotted rooms (important if re-running)
+                               const isPreviouslyTaken = state.allotments.some(a => a.hostelBlock === "omv" && a.roomNumber === roomStr);
+
+                             if (!isNewlyTaken && !isPreviouslyTaken) {
+                                 const allotment = {
+                                     id: Date.now().toString() + Math.random(),
+                                     userId: registration.userId,
+                                     hostelBlock: "omv",
+                                     roomType: registration.roomType,
+                                     roomNumber: roomStr,
+                                 };
+                                 newlyAllotted.push(allotment);
+                                 currentAvailability.omv[range].available--; // Decrement temp count
+                                 registration.status = "allotted"; // Update status immediately
+                                 roomAssigned = true;
+                                 break; // Exit inner room loop
+                             }
+                         }
+                     }
+                     if (roomAssigned) break; // Exit outer range loop
+                }
+
+            } else if (block === "bh2" && currentAvailability.bh2) {
+                 for (let floorNum = 1; floorNum <= 4; floorNum++) { // Iterate floors
+                     const floorKey = `floor${floorNum}`;
+                     if (currentAvailability.bh2[floorKey] && currentAvailability.bh2[floorKey].available > 0) {
+                         const startRoom = (floorNum - 1) * 20 + 1;
+                         const endRoom = floorNum * 20;
+
+                         for (let roomNum = startRoom; roomNum <= endRoom; roomNum++) {
+                             const roomStr = roomNum.toString().padStart(3, "0");
+                              // Check against *newly* allotted rooms
+                             const isNewlyTaken = newlyAllotted.some(a => a.hostelBlock === "bh2" && a.roomNumber === roomStr);
+                              // Check against *previously* allotted rooms
+                             const isPreviouslyTaken = state.allotments.some(a => a.hostelBlock === "bh2" && a.roomNumber === roomStr);
+
+                             if (!isNewlyTaken && !isPreviouslyTaken) {
+                                 const allotment = {
+                                     id: Date.now().toString() + Math.random(),
+                                     userId: registration.userId,
+                                     hostelBlock: "bh2",
+                                     roomType: registration.roomType,
+                                     roomNumber: roomStr,
+                                 };
+                                 newlyAllotted.push(allotment);
+                                 currentAvailability.bh2[floorKey].available--; // Decrement temp count
+                                 registration.status = "allotted"; // Update status
+                                 roomAssigned = true;
+                                 break; // Exit inner room loop
+                             }
+                         }
+                     }
+                      if (roomAssigned) break; // Exit outer floor loop
+                 }
+            }
+
+            // If still not assigned after checking preferred block
+            if (!roomAssigned) {
+                 // You could add logic here to try the *other* block if preferred is full
+                 // For now, just mark as waiting
+                 if (registration.status === 'waiting') { // Avoid overwriting 'allotted'
+                     registration.status = "waiting (no rooms available)";
+                 }
+            }
+        } // End of loop through registrations
+
+        // Add newly allotted rooms to the main state *after* processing all
+        state.allotments.push(...newlyAllotted);
+
+        // --- End of Refined Logic ---
+
+
+        // Save updated registrations and allotments
+        localStorage.setItem("allotments", JSON.stringify(state.allotments));
+        localStorage.setItem("registrations", JSON.stringify(state.registrations));
+
+        // Update the main room availability state based on the final allotments
+        updateRoomAvailability();
+        // Also update the display on the registration page immediately
+        updateRoomAvailabilityDisplay();
+
+
+        // Show result message
+        messageDiv.textContent = `Allotment process complete! ${newlyAllotted.length} new rooms allotted. Total allotted: ${state.allotments.length}.`;
+        messageDiv.style.display = "block";
+
+        // Update admin panel tables
+        updateAdminPanel();
+      }
+
+
+      // --- CHATBOT LOGIC (REMOVED) ---
+      // --- NEW CHATBOT FUNCTIONS ---
+      
+      // Toggles the chatbot window
+      function toggleChatbot() {
+          if (chatbotContainer && chatbotToggle) {
+              chatbotContainer.classList.toggle("open");
+              chatbotToggle.classList.toggle("open");
+          }
+      }
+
+      // Handles sending a new chat message
+      function handleChatMessage(e) {
+          e.preventDefault();
+          if (!chatbotInput) return;
+          const messageText = chatbotInput.value.trim();
+
+          if (messageText) {
+              addMessageToUI("user", messageText);
+              chatbotInput.value = "";
+              getBotResponse(messageText);
+          }
+      }
+
+      // Adds a message to the chat UI
+      function addMessageToUI(sender, text) {
+          if (!chatbotMessages) return;
+          const messageElement = document.createElement("div");
+          messageElement.className = `chat-message ${sender}-message`;
+          messageElement.textContent = text;
+          chatbotMessages.appendChild(messageElement);
+          // Scroll to bottom
+          chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+      }
+
+      // Simulates bot response with more if-else logic
+      function getBotResponse(userMessage) {
+          if (!chatbotMessages) return;
+
+          // Show typing indicator
+          const typingIndicator = document.createElement("div");
+          typingIndicator.className = "bot-typing";
+          typingIndicator.textContent = "Assistant is typing...";
+          chatbotMessages.appendChild(typingIndicator);
+          chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+
+          const normalizedMsg = userMessage.toLowerCase();
+          let botResponse = "I'm sorry, I couldn't find information on that. Could you ask about registration, room status, allotment, or your profile?";
+
+          // Simulate API delay
+          setTimeout(() => {
+              // Remove typing indicator
+              typingIndicator.remove();
+
+              // Expanded if-else logic
+              if (normalizedMsg.includes("hello") || normalizedMsg.includes("hi") || normalizedMsg.includes("hey")) {
+                  const greetings = [
+                      "Hello! How can I assist you with the hostel allocation today?",
+                      "Hi there! What information do you need about hostel rooms?",
+                      "Hey! Ask me about registration, rooms, or your status."
+                  ];
+                  botResponse = greetings[Math.floor(Math.random() * greetings.length)];
+              } else if (normalizedMsg.includes("how to register") || normalizedMsg.includes("start registration")) {
+                  botResponse = "To register, please go to the 'Room Registration' page using the sidebar link. Select your preferred hostel block and room type, then submit the form.";
+              } else if (normalizedMsg.includes("register") || normalizedMsg.includes("registration")) {
+                  botResponse = "You can register for a room by navigating to the 'Room Registration' page from the sidebar. Need more details?";
+              } else if (normalizedMsg.includes("room") && (normalizedMsg.includes("availability") || normalizedMsg.includes("available"))) {
+                   botResponse = "Room availability is shown live on the 'Room Registration' page. You'll need to select a hostel block (OMV or BH-2) to see the current status for different room types or floors.";
+              } else if (normalizedMsg.includes("check status") || normalizedMsg.includes("my status") || (normalizedMsg.includes("allotment") && normalizedMsg.includes("result"))) {
+                   botResponse = "You can check your specific allotment result by visiting the 'Allotment Result' page in the sidebar. It will show if a room has been assigned to you.";
+              } else if (normalizedMsg.includes("status") || normalizedMsg.includes("allotment")) {
+                  botResponse = "For your current status (Registered, Waiting, Allotted), please check the Dashboard or the 'Allotment Result' page.";
+              } else if (normalizedMsg.includes("omv")) {
+                  botResponse = "OMV is one of the available hostel blocks. It offers various room ranges. Check the 'Room Registration' page for current availability details.";
+              } else if (normalizedMsg.includes("bh-2") || normalizedMsg.includes("bh2")) {
+                  botResponse = "BH-2 is the second hostel block, organized by floors. You can view its room availability on the 'Room Registration' page after selecting it.";
+              } else if (normalizedMsg.includes("single room") || normalizedMsg.includes("double room") || normalizedMsg.includes("triple room")) {
+                   botResponse = "We offer Single, Double, and Triple occupancy rooms, subject to availability in each block. You select your preference during registration.";
+              } else if (normalizedMsg.includes("profile") || normalizedMsg.includes("my info") || normalizedMsg.includes("details")) {
+                  botResponse = "Your profile details (Name, Email, Gender, and Room Status) are available on the 'Profile' page. You can also edit your information there.";
+              } else if (normalizedMsg.includes("edit") && normalizedMsg.includes("profile")) {
+                   botResponse = "Yes, you can edit your profile. Go to the 'Profile' page and click the 'Edit Profile' button.";
+              } else if (normalizedMsg.includes("logout") || normalizedMsg.includes("log out") || normalizedMsg.includes("sign out")) {
+                  botResponse = "You can log out using the 'Logout' button on the Dashboard or the Profile page.";
+              } else if (normalizedMsg.includes("admin")) {
+                  botResponse = "The Admin panel is for authorized personnel to manage registrations and run the allotment process.";
+              } else if (normalizedMsg.includes("help") || normalizedMsg.includes("support") || normalizedMsg.includes("contact")) {
+                  botResponse = "If you need further assistance, please contact the hostel administration office directly. I can help with information available on this portal.";
+              } else if (normalizedMsg.includes("fee") || normalizedMsg.includes("cost") || normalizedMsg.includes("price")) {
+                  botResponse = "Information about hostel fees is usually provided by the administration during the admission process. I don't have access to specific fee structures.";
+              } else if (normalizedMsg.includes("rules") || normalizedMsg.includes("regulations")) {
+                  botResponse = "General hostel rules and regulations should be available from the administration or the student handbook. Please refer to official sources for detailed rules.";
+              } else if (normalizedMsg.includes("bye") || normalizedMsg.includes("thank") || normalizedMsg.includes("thanks") || normalizedMsg.includes("ok")) {
+                  const farewells = [
+                      "You're welcome! Let me know if you need anything else.",
+                      "Glad I could help! Have a great day.",
+                      "Okay, feel free to ask if more questions come up."
+                  ];
+                  botResponse = farewells[Math.floor(Math.random() * farewells.length)];
+              }
+
+              // Add bot's actual response
+              addMessageToUI("bot", botResponse);
+          }, 1200 + Math.random() * 800); // Add slight variability to delay (1.2s - 2.0s)
+      }
+      // --- END NEW CHATBOT FUNCTIONS ---
+
+
+      // Initialize the application when DOM is loaded
+      document.addEventListener("DOMContentLoaded", init);
+    </script>
+  </body>
+</html>
+
